@@ -70,6 +70,52 @@
             padding: 12px;
             font-size: 12px;
         }
+        /* STATISTIK GIANMAP */
+.statistik {
+    padding: 35px 20px;
+    background: #f4f8f5;
+    text-align: center;
+}
+
+.statistik h2 {
+    color: #176B50;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.statistik > p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.statistik-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    max-width: 1000px;
+    margin: auto;
+}
+
+.statistik-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px 20px;
+    width: 220px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    border-bottom: 4px solid #176B50;
+}
+
+.statistik-card h3 {
+    color: #176B50;
+    font-size: 32px;
+    margin: 0 0 10px;
+}
+
+.statistik-card p {
+    color: #555;
+    margin: 0;
+}
     </style>
 </head>
 
@@ -90,6 +136,27 @@
 
     <div id="map"></div>
 
+    <section class="statistik">
+    <h2>Statistik Persebaran UMKM</h2>
+    <p>Ringkasan data UMKM yang telah dipetakan dalam GIANMAP.</p>
+
+    <div class="statistik-container">
+        <div class="statistik-card">
+            <h3 id="total-umkm">0</h3>
+            <p>Total UMKM Terdata</p>
+        </div>
+
+        <div class="statistik-card">
+            <h3 id="total-tekstil">0</h3>
+            <p>Kerajinan Tekstil</p>
+        </div>
+
+        <div class="statistik-card">
+            <h3 id="total-makanan">0</h3>
+            <p>Makanan dan Minuman</p>
+        </div>
+    </div>
+</section>
     <footer>
         GIANMAP UMKM | Pemetaan Potensi Ekonomi Lokal Gianyar
     </footer>
@@ -116,11 +183,41 @@ const umkm = [
     {
         nama: "Pertenunan Setia Cap Cili",
         kecamatan: "Gianyar",
+        desa: "",
         kategori: "Kerajinan Tekstil",
         produk: "Kain tenun tradisional",
         alamat: "Gianyar, Kabupaten Gianyar, Bali",
+        deskripsi: "",
         latitude: -8.54,
-        longitude: 115.32
+        longitude: 115.32,
+        googleMaps: "",
+        foto: "setia-cap-cili.png"
+    },
+    {
+        nama: "Baline Chocolate",
+        kecamatan: "Sukawati",
+        desa: "Batubulan",
+        kategori: "Industri Makanan dan Minuman",
+        produk: "Permen dan Cokelat",
+        alamat: "Jl. Dewi Sri, Gang Salak I No. 1, Batubulan",
+        deskripsi: "Baline Chocolate, yang berarti 'Ini Cokelat Bali' dalam bahasa Bali, berkolaborasi dengan perusahaan pengolahan produk hutan non-kayu. Bahan cokelat berkualitas tinggi diperoleh dari para petani di Bali Barat.",
+        latitude: -8.630941,
+        longitude: 115.264840,
+        googleMaps: "https://maps.app.goo.gl/mP1CG4kUZkQsLVpM9",
+        foto: "baline chocolate.jpeg"
+    },
+    {
+        nama: "Pertenunan Putri Ayu",
+        kecamatan: "Blahbatuh",
+        desa: "",
+        kategori: "Kerajinan Tekstil",
+        produk: "Kain Tenun Ikat/Endek",
+        alamat: "Jl. Lapangan Astina Raya No. 3, Blahbatuh",
+        deskripsi: "Pertenunan Putri Ayu merupakan sentra kerajinan tenun ikat di Blahbatuh, Gianyar, Bali. Berdiri sejak awal 1990-an, usaha ini berkembang dari lima alat tenun sederhana menjadi produsen kain tenun berkualitas tinggi yang dikenal hingga mancanegara.",
+        latitude: -8.566639,
+        longitude: 115.294659,
+        googleMaps: "https://maps.app.goo.gl/jqUrE8di4QafBmi17",
+        foto: "putri-ayu.jpeg"
     }
 ];
 
@@ -138,9 +235,10 @@ umkm.forEach(function(data) {
     ${data.nama}
 </h3>
 
+${data.foto ? `
 <img
-    src="setia-cap-cili.png"
-    alt="Pertenunan Setia Cap Cili"
+    src="${data.foto}"
+    alt="${data.nama}"
     style="
         width:100%;
         height:140px;
@@ -149,7 +247,7 @@ umkm.forEach(function(data) {
         margin-bottom:10px;
     "
 >
-
+` : ""}
             <div style="
                 background:#e5f2eb;
                 color:#176B50;
@@ -203,11 +301,58 @@ umkm.forEach(function(data) {
         </div>
     `;
 
-    L.marker([data.latitude, data.longitude])
-        .addTo(map)
-        .bindPopup(popup);
+    // Menentukan simbol berdasarkan kategori UMKM
+let simbol = "📍";
+let warna = "#777777";
+
+if (data.kategori === "Kerajinan Tekstil") {
+    simbol = "🧵";
+    warna = "#176B50";
+} else if (data.kategori === "Industri Makanan dan Minuman") {
+    simbol = "🍫";
+    warna = "#D97706";
+}
+
+// Membuat ikon kategori
+const ikonKategori = L.divIcon({
+    className: "",
+    html: `
+        <div style="
+            width:38px;
+            height:38px;
+            background:${warna};
+            border:3px solid white;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:19px;
+            box-shadow:0 2px 6px rgba(0,0,0,0.3);
+        ">
+            ${simbol}
+        </div>
+    `,
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
+    popupAnchor: [0, -20]
 });
 
+// Menampilkan marker pada peta
+L.marker(
+    [data.latitude, data.longitude],
+    { icon: ikonKategori }
+)
+.addTo(map)
+.bindPopup(popup);
+});
+// Menghitung statistik UMKM secara otomatis
+document.getElementById("total-umkm").textContent = umkm.length;
+
+document.getElementById("total-tekstil").textContent =
+    umkm.filter(data => data.kategori === "Kerajinan Tekstil").length;
+
+document.getElementById("total-makanan").textContent =
+    umkm.filter(data => data.kategori === "Industri Makanan dan Minuman").length;
 
     </script>
 
