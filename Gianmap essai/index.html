@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIANMAP UMKM</title>
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f5;
+        }
+
+        header {
+            background-color: #176B50;
+            color: white;
+            text-align: center;
+            padding: 22px 15px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 8px 0 0;
+            font-size: 14px;
+        }
+
+        .intro {
+            padding: 15px 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        .intro h2 {
+            color: #176B50;
+            margin-bottom: 5px;
+        }
+
+        .intro p {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        #map {
+            width: 100%;
+            height: 70vh;
+            min-height: 400px;
+            border-top: 3px solid #176B50;
+        }
+
+        footer {
+            background-color: #176B50;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+        }
+        /* STATISTIK GIANMAP */
+.statistik {
+    padding: 35px 20px;
+    background: #f4f8f5;
+    text-align: center;
+}
+
+.statistik h2 {
+    color: #176B50;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.statistik > p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.statistik-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    max-width: 1000px;
+    margin: auto;
+}
+
+.statistik-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px 20px;
+    width: 220px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    border-bottom: 4px solid #176B50;
+}
+
+.statistik-card h3 {
+    color: #176B50;
+    font-size: 32px;
+    margin: 0 0 10px;
+}
+
+.statistik-card p {
+    color: #555;
+    margin: 0;
+}
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>GIANMAP UMKM</h1>
+        <p>Pemetaan Digital UMKM Kabupaten Gianyar</p>
+    </header>
+
+    <section class="intro">
+        <h2>Jelajahi Potensi UMKM Gianyar</h2>
+        <p>
+            Temukan lokasi dan informasi UMKM di berbagai kecamatan
+            di Kabupaten Gianyar.
+        </p>
+    </section>
+
+    <div id="map"></div>
+
+    <section class="statistik">
+    <h2>Statistik Persebaran UMKM</h2>
+    <p>Ringkasan data UMKM yang telah dipetakan dalam GIANMAP.</p>
+
+    <div class="statistik-container">
+        <div class="statistik-card">
+            <h3 id="total-umkm">0</h3>
+            <p>Total UMKM Terdata</p>
+        </div>
+
+        <div class="statistik-card">
+            <h3 id="total-tekstil">0</h3>
+            <p>Kerajinan Tekstil</p>
+        </div>
+
+        <div class="statistik-card">
+            <h3 id="total-makanan">0</h3>
+            <p>Makanan dan Minuman</p>
+        </div>
+    </div>
+</section>
+    <footer>
+        GIANMAP UMKM | Pemetaan Potensi Ekonomi Lokal Gianyar
+    </footer>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        
+// Membuat peta yang berpusat di Kabupaten Gianyar
+const map = L.map('map').setView([-8.54, 115.32], 12);
+
+// Menampilkan peta Esri
+L.tileLayer(
+    'https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+    {
+        attribution: 'Sources: Esri, HERE, Garmin, USGS, and other contributors',
+        maxZoom: 19
+    }
+).addTo(map);
+
+// Data UMKM
+const umkm = [
+    {
+        nama: "Pertenunan Setia Cap Cili",
+        kecamatan: "Gianyar",
+        desa: "",
+        kategori: "Kerajinan Tekstil",
+        produk: "Kain tenun tradisional",
+        alamat: "Gianyar, Kabupaten Gianyar, Bali",
+        deskripsi: "",
+        latitude: -8.54,
+        longitude: 115.32,
+        googleMaps: "",
+        foto: "setia-cap-cili.png"
+    },
+    {
+        nama: "Baline Chocolate",
+        kecamatan: "Sukawati",
+        desa: "Batubulan",
+        kategori: "Industri Makanan dan Minuman",
+        produk: "Permen dan Cokelat",
+        alamat: "Jl. Dewi Sri, Gang Salak I No. 1, Batubulan",
+        deskripsi: "Baline Chocolate, yang berarti 'Ini Cokelat Bali' dalam bahasa Bali, berkolaborasi dengan perusahaan pengolahan produk hutan non-kayu. Bahan cokelat berkualitas tinggi diperoleh dari para petani di Bali Barat.",
+        latitude: -8.630941,
+        longitude: 115.264840,
+        googleMaps: "https://maps.app.goo.gl/mP1CG4kUZkQsLVpM9",
+        foto: "baline chocolate.jpeg"
+    },
+    {
+        nama: "Pertenunan Putri Ayu",
+        kecamatan: "Blahbatuh",
+        desa: "",
+        kategori: "Kerajinan Tekstil",
+        produk: "Kain Tenun Ikat/Endek",
+        alamat: "Jl. Lapangan Astina Raya No. 3, Blahbatuh",
+        deskripsi: "Pertenunan Putri Ayu merupakan sentra kerajinan tenun ikat di Blahbatuh, Gianyar, Bali. Berdiri sejak awal 1990-an, usaha ini berkembang dari lima alat tenun sederhana menjadi produsen kain tenun berkualitas tinggi yang dikenal hingga mancanegara.",
+        latitude: -8.566639,
+        longitude: 115.294659,
+        googleMaps: "https://maps.app.goo.gl/jqUrE8di4QafBmi17",
+        foto: "putri-ayu.jpeg"
+    }
+];
+
+
+// Menampilkan titik UMKM pada peta
+umkm.forEach(function(data) {
+    const popup = `
+        <div style="width:230px; font-family:Arial,sans-serif;">
+
+            <h3 style="
+    color:#176B50;
+    margin:0 0 10px;
+    font-size:17px;
+">
+    ${data.nama}
+</h3>
+
+${data.foto ? `
+<img
+    src="${data.foto}"
+    alt="${data.nama}"
+    style="
+        width:100%;
+        height:140px;
+        object-fit:cover;
+        border-radius:8px;
+        margin-bottom:10px;
+    "
+>
+` : ""}
+            <div style="
+                background:#e5f2eb;
+                color:#176B50;
+                padding:6px 9px;
+                border-radius:6px;
+                display:inline-block;
+                font-size:12px;
+                font-weight:bold;
+                margin-bottom:10px;
+            ">
+                ${data.kategori}
+            </div>
+
+            <p style="margin:5px 0;">
+                <b>Kecamatan:</b> ${data.kecamatan}
+            </p>
+
+            <p style="margin:5px 0;">
+                <b>Produk:</b> ${data.produk}
+            </p>
+
+            <p style="margin:5px 0;">
+                <b>Alamat:</b> ${data.alamat}
+            </p>
+
+            <p style="
+                font-size:11px;
+                color:#777;
+                margin-top:12px;
+            ">
+                Status: Data awal, perlu verifikasi akhir
+            </p>
+
+            <a
+                href="https://www.google.com/maps/search/?api=1&query=Pertenunan+Setia+Cap+Cili+Gianyar"
+                target="_blank"
+                style="
+                    display:block;
+                    background:#176B50;
+                    color:white;
+                    text-align:center;
+                    padding:9px;
+                    border-radius:6px;
+                    text-decoration:none;
+                    margin-top:10px;
+                "
+            >
+                Lihat di Google Maps
+            </a>
+
+        </div>
+    `;
+
+    // Menentukan simbol berdasarkan kategori UMKM
+let simbol = "📍";
+let warna = "#777777";
+
+if (data.kategori === "Kerajinan Tekstil") {
+    simbol = "🧵";
+    warna = "#176B50";
+} else if (data.kategori === "Industri Makanan dan Minuman") {
+    simbol = "🍫";
+    warna = "#D97706";
+}
+
+// Membuat ikon kategori
+const ikonKategori = L.divIcon({
+    className: "",
+    html: `
+        <div style="
+            width:38px;
+            height:38px;
+            background:${warna};
+            border:3px solid white;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:19px;
+            box-shadow:0 2px 6px rgba(0,0,0,0.3);
+        ">
+            ${simbol}
+        </div>
+    `,
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
+    popupAnchor: [0, -20]
+});
+
+// Menampilkan marker pada peta
+L.marker(
+    [data.latitude, data.longitude],
+    { icon: ikonKategori }
+)
+.addTo(map)
+.bindPopup(popup);
+});
+// Menghitung statistik UMKM secara otomatis
+document.getElementById("total-umkm").textContent = umkm.length;
+
+document.getElementById("total-tekstil").textContent =
+    umkm.filter(data => data.kategori === "Kerajinan Tekstil").length;
+
+document.getElementById("total-makanan").textContent =
+    umkm.filter(data => data.kategori === "Industri Makanan dan Minuman").length;
+
+    </script>
+
+</body>
+</html>
